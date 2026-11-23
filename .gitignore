@@ -1,0 +1,16 @@
+# Compilados
+bin/
+bin-test/
+out/
+*.class
+
+# Partida guardada que crea el juego al ejecutarse
+*.dat
+*.dat.tmp
+
+# IDE / sistema
+.metadata/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
