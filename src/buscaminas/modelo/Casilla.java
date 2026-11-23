@@ -49,7 +49,14 @@ public abstract class Casilla implements CasillaSoloLectura, Serializable {
      * @throws CasillaMarcadaException       si el jugador la había marcado
      */
     ResultadoDescubrimiento descubrir() throws CasillaYaDescubiertaException, CasillaMarcadaException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        if (estaDescubierta()) {
+            throw new CasillaYaDescubiertaException(posicion.aTexto());
+        }
+        if (estaMarcada()) {
+            throw new CasillaMarcadaException(posicion.aTexto());
+        }
+        estado = EstadoCasilla.DESCUBIERTA;
+        return resultadoAlDescubrir();
     }
 
     /**
@@ -59,7 +66,11 @@ public abstract class Casilla implements CasillaSoloLectura, Serializable {
      * @throws CasillaYaDescubiertaException si la casilla ya está descubierta
      */
     boolean alternarMarca() throws CasillaYaDescubiertaException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        if (estaDescubierta()) {
+            throw new CasillaYaDescubiertaException(posicion.aTexto());
+        }
+        estado = estaMarcada() ? EstadoCasilla.CUBIERTA : EstadoCasilla.MARCADA;
+        return estaMarcada();
     }
 
     /** Muestra la casilla al final de la partida sin aplicar las reglas de una jugada. */

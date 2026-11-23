@@ -95,7 +95,16 @@ public final class Tablero implements Serializable {
     }
 
     private int contarMinasVecinas(Coordenada posicion, Set<Coordenada> posicionesMinas) {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        int minasVecinas = 0;
+        for (int fila = posicion.getFila() - 1; fila <= posicion.getFila() + 1; fila++) {
+            for (int columna = posicion.getColumna() - 1; columna <= posicion.getColumna() + 1; columna++) {
+                if (fila >= 0 && fila < getFilas() && columna >= 0 && columna < getColumnas()
+                        && posicionesMinas.contains(new Coordenada(fila, columna))) {
+                    minasVecinas++;
+                }
+            }
+        }
+        return minasVecinas;
     }
 
     // ================================================================ jugadas
@@ -112,7 +121,15 @@ public final class Tablero implements Serializable {
      */
     ResultadoDescubrimiento descubrir(Coordenada coordenada)
             throws CoordenadaFueraDeRangoException, CasillaYaDescubiertaException, CasillaMarcadaException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        Casilla casilla = obtener(coordenada);
+        ResultadoDescubrimiento resultado = casilla.descubrir();
+        if (resultado != ResultadoDescubrimiento.MINA) {
+            segurasDescubiertas++;
+        }
+        if (resultado == ResultadoDescubrimiento.VACIA) {
+            expandirDesde(coordenada);
+        }
+        return resultado;
     }
 
     /**
@@ -121,7 +138,25 @@ public final class Tablero implements Serializable {
      * y no dependa de la profundidad de la pila.
      */
     private void expandirDesde(Coordenada inicio) {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        Deque<Coordenada> pendientes = new ArrayDeque<>();
+        pendientes.add(inicio);
+        while (!pendientes.isEmpty()) {
+            Coordenada actual = pendientes.poll();
+            for (int fila = actual.getFila() - 1; fila <= actual.getFila() + 1; fila++) {
+                for (int columna = actual.getColumna() - 1; columna <= actual.getColumna() + 1; columna++) {
+                    if (fila >= 0 && fila < getFilas() && columna >= 0 && columna < getColumnas()) {
+                        Casilla casilla = casillas[fila][columna];
+                        if (casilla.estaCubierta()) { // las casillas marcadas se respetan
+                            casilla.revelar();
+                            segurasDescubiertas++;
+                            if (casilla.resultadoAlDescubrir() == ResultadoDescubrimiento.VACIA) {
+                                pendientes.add(new Coordenada(fila, columna));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -134,12 +169,18 @@ public final class Tablero implements Serializable {
      */
     boolean alternarMarca(Coordenada coordenada)
             throws CoordenadaFueraDeRangoException, CasillaYaDescubiertaException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        return obtener(coordenada).alternarMarca();
     }
 
     /** Descubre todas las minas para mostrarlas cuando el jugador pierde. */
     void revelarMinas() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        for (Casilla[] fila : casillas) {
+            for (Casilla casilla : fila) {
+                if (casilla.esMina()) {
+                    casilla.revelar();
+                }
+            }
+        }
     }
 
     /**
@@ -174,7 +215,7 @@ public final class Tablero implements Serializable {
 
     /** @return {@code true} cuando todas las casillas sin mina están descubiertas (victoria) */
     public boolean todasLasSegurasDescubiertas() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        return segurasDescubiertas == getTotalSeguras();
     }
 
     /** @return número de filas */
@@ -204,6 +245,14 @@ public final class Tablero implements Serializable {
 
     /** @return cuántas casillas marcó el jugador */
     public int contarMarcas() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        int marcas = 0;
+        for (Casilla[] fila : casillas) {
+            for (Casilla casilla : fila) {
+                if (casilla.estaMarcada()) {
+                    marcas++;
+                }
+            }
+        }
+        return marcas;
     }
 }

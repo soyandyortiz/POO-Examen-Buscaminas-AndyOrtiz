@@ -42,7 +42,17 @@ public final class Coordenada implements Serializable {
      * @throws CoordenadaInvalidaException si el texto no es una letra seguida de un número
      */
     public static Coordenada desdeTexto(String texto) throws CoordenadaInvalidaException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        if (texto == null) {
+            throw new CoordenadaInvalidaException("Debe escribir una coordenada, por ejemplo A5");
+        }
+        Matcher partes = FORMATO.matcher(texto.trim().toUpperCase(Locale.ROOT));
+        if (!partes.matches()) {
+            throw new CoordenadaInvalidaException("'" + texto.trim()
+                    + "' no es una coordenada válida; use una letra y un número, por ejemplo A5");
+        }
+        int fila = partes.group(1).charAt(0) - 'A';
+        int columna = Integer.parseInt(partes.group(2)) - 1;
+        return new Coordenada(fila, columna);
     }
 
     /** @return índice de fila desde 0 */
@@ -69,7 +79,7 @@ public final class Coordenada implements Serializable {
 
     /** @return la coordenada como la ve el jugador, por ejemplo "A5" */
     public String aTexto() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        return String.valueOf((char) ('A' + fila)) + (columna + 1);
     }
 
     @Override

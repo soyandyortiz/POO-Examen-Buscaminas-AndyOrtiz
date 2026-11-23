@@ -44,7 +44,16 @@ public class Partida implements Serializable {
      *                             la casilla ya estaba descubierta o está marcada
      */
     public ResultadoDescubrimiento descubrir(Coordenada coordenada) throws BuscaminasException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        verificarEnCurso();
+        ResultadoDescubrimiento resultado = tablero.descubrir(coordenada);
+        jugador.registrarJugada();
+        if (resultado == ResultadoDescubrimiento.MINA) {
+            estado = EstadoPartida.PERDIDA;
+            tablero.revelarMinas();
+        } else if (tablero.todasLasSegurasDescubiertas()) {
+            estado = EstadoPartida.GANADA;
+        }
+        return resultado;
     }
 
     /**
@@ -55,7 +64,8 @@ public class Partida implements Serializable {
      * @throws BuscaminasException si la partida terminó, la coordenada no existe o ya está descubierta
      */
     public boolean alternarMarca(Coordenada coordenada) throws BuscaminasException {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        verificarEnCurso();
+        return tablero.alternarMarca(coordenada);
     }
 
     private void verificarEnCurso() throws JuegoTerminadoException {

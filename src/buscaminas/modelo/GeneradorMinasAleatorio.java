@@ -31,6 +31,17 @@ public class GeneradorMinasAleatorio implements GeneradorMinas {
 
     @Override
     public Set<Coordenada> generar(int filas, int columnas, int cantidad) {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        if (cantidad < 0 || cantidad > filas * columnas) {
+            throw new IllegalArgumentException("No se pueden colocar " + cantidad + " minas en "
+                    + (filas * columnas) + " casillas");
+        }
+        List<Coordenada> todas = new ArrayList<>();
+        for (int fila = 0; fila < filas; fila++) {
+            for (int columna = 0; columna < columnas; columna++) {
+                todas.add(new Coordenada(fila, columna));
+            }
+        }
+        Collections.shuffle(todas, aleatorio);
+        return new HashSet<>(todas.subList(0, cantidad));
     }
 }

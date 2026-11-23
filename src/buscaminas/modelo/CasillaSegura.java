@@ -42,11 +42,11 @@ public class CasillaSegura extends Casilla {
 
     @Override
     public char simboloDescubierto() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        return esVacia() ? SIMBOLO_VACIA : Character.forDigit(minasAdyacentes, 10);
     }
 
     @Override
     protected ResultadoDescubrimiento resultadoAlDescubrir() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        return esVacia() ? ResultadoDescubrimiento.VACIA : ResultadoDescubrimiento.NUMERO;
     }
 }

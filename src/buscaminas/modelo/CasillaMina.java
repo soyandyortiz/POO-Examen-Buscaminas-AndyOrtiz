@@ -27,6 +27,6 @@ public class CasillaMina extends Casilla {
 
     @Override
     protected ResultadoDescubrimiento resultadoAlDescubrir() {
-        throw new UnsupportedOperationException("TDD: pendiente de implementar");
+        return ResultadoDescubrimiento.MINA;
     }
 }
