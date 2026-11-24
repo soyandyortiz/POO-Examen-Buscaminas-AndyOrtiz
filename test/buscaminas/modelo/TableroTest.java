@@ -73,6 +73,13 @@ class TableroTest {
         }
 
         @Test
+        void lasVecinasDeUnaEsquinaSonTres() {
+            assertEquals(3, tableroConocido().vecinas(new Coordenada(0, 0)).size());
+            assertEquals(5, tableroConocido().vecinas(new Coordenada(0, 5)).size());
+            assertEquals(8, tableroConocido().vecinas(new Coordenada(5, 5)).size());
+        }
+
+        @Test
         void rechazaConfiguracionesInvalidas() {
             GeneradorMinas generador = new GeneradorMinasFijo("A1");
             assertThrows(IllegalArgumentException.class, () -> new Tablero(0, 5, 1, generador));

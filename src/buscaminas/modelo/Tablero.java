@@ -2,7 +2,9 @@ package buscaminas.modelo;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Set;
 
 import buscaminas.modelo.excepciones.CasillaMarcadaException;
@@ -96,12 +98,9 @@ public final class Tablero implements Serializable {
 
     private int contarMinasVecinas(Coordenada posicion, Set<Coordenada> posicionesMinas) {
         int minasVecinas = 0;
-        for (int fila = posicion.getFila() - 1; fila <= posicion.getFila() + 1; fila++) {
-            for (int columna = posicion.getColumna() - 1; columna <= posicion.getColumna() + 1; columna++) {
-                if (fila >= 0 && fila < getFilas() && columna >= 0 && columna < getColumnas()
-                        && posicionesMinas.contains(new Coordenada(fila, columna))) {
-                    minasVecinas++;
-                }
+        for (Coordenada vecina : vecinas(posicion)) {
+            if (posicionesMinas.contains(vecina)) {
+                minasVecinas++;
             }
         }
         return minasVecinas;
@@ -141,18 +140,13 @@ public final class Tablero implements Serializable {
         Deque<Coordenada> pendientes = new ArrayDeque<>();
         pendientes.add(inicio);
         while (!pendientes.isEmpty()) {
-            Coordenada actual = pendientes.poll();
-            for (int fila = actual.getFila() - 1; fila <= actual.getFila() + 1; fila++) {
-                for (int columna = actual.getColumna() - 1; columna <= actual.getColumna() + 1; columna++) {
-                    if (fila >= 0 && fila < getFilas() && columna >= 0 && columna < getColumnas()) {
-                        Casilla casilla = casillas[fila][columna];
-                        if (casilla.estaCubierta()) { // las casillas marcadas se respetan
-                            casilla.revelar();
-                            segurasDescubiertas++;
-                            if (casilla.resultadoAlDescubrir() == ResultadoDescubrimiento.VACIA) {
-                                pendientes.add(new Coordenada(fila, columna));
-                            }
-                        }
+            for (Coordenada vecina : vecinas(pendientes.poll())) {
+                Casilla casilla = casillas[vecina.getFila()][vecina.getColumna()];
+                if (casilla.estaCubierta()) { // las casillas marcadas se respetan
+                    casilla.revelar();
+                    segurasDescubiertas++;
+                    if (casilla.resultadoAlDescubrir() == ResultadoDescubrimiento.VACIA) {
+                        pendientes.add(vecina);
                     }
                 }
             }
@@ -197,6 +191,26 @@ public final class Tablero implements Serializable {
     }
 
     // ================================================================ consultas
+
+    /**
+     * Devuelve las coordenadas vecinas (hasta 8) que están dentro del tablero.
+     * Se reutiliza para contar minas y para la expansión de casillas vacías (DRY).
+     *
+     * @param centro casilla de la que se buscan las vecinas
+     * @return lista de vecinas válidas
+     */
+    public List<Coordenada> vecinas(Coordenada centro) {
+        List<Coordenada> vecinas = new ArrayList<>(8);
+        for (int deltaFila = -1; deltaFila <= 1; deltaFila++) {
+            for (int deltaColumna = -1; deltaColumna <= 1; deltaColumna++) {
+                Coordenada vecina = centro.desplazar(deltaFila, deltaColumna);
+                if (!vecina.equals(centro) && estaDentro(vecina, getFilas(), getColumnas())) {
+                    vecinas.add(vecina);
+                }
+            }
+        }
+        return vecinas;
+    }
 
     private static boolean estaDentro(Coordenada c, int filas, int columnas) {
         return c.getFila() >= 0 && c.getFila() < filas && c.getColumna() >= 0 && c.getColumna() < columnas;
