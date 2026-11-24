@@ -1,0 +1,168 @@
+classDiagram
+    direction TB
+    namespace modelo {
+        class Casilla {
+            <<abstract>>
+            -posicion : Coordenada
+            -estado : EstadoCasilla
+            ~descubrir() ResultadoDescubrimiento
+            ~alternarMarca() boolean
+            ~revelar() void
+            #resultadoAlDescubrir()* ResultadoDescubrimiento
+            +esMina()* boolean
+            +simboloDescubierto()* char
+        }
+        class CasillaMina {
+            +SIMBOLO : char = 'X'$
+        }
+        class CasillaSegura {
+            -minasAdyacentes : int
+            +esVacia() boolean
+        }
+        class CasillaSoloLectura {
+            <<interface>>
+            +getPosicion() Coordenada
+            +getEstado() EstadoCasilla
+            +esMina() boolean
+            +simboloDescubierto() char
+        }
+        class Tablero {
+            <<final>>
+            +FILAS : int = 10$
+            +COLUMNAS : int = 10$
+            +MINAS : int = 10$
+            -casillas : Casilla[][]
+            -totalMinas : int
+            -segurasDescubiertas : int
+            ~descubrir(c) ResultadoDescubrimiento
+            ~alternarMarca(c) boolean
+            ~revelarMinas() void
+            -expandirDesde(c) void
+            -obtener(c) Casilla
+            +vecinas(c) List~Coordenada~
+            +casillaEn(f, c) CasillaSoloLectura
+            +todasLasSegurasDescubiertas() boolean
+        }
+        class Partida {
+            -estado : EstadoPartida
+            -fechaInicio : LocalDateTime
+            +descubrir(c) ResultadoDescubrimiento
+            +alternarMarca(c) boolean
+            +estaTerminada() boolean
+            +getMinasPendientes() int
+        }
+        class Jugador {
+            -nombre : String
+            -jugadas : int
+        }
+        class Coordenada {
+            <<final>>
+            -fila : int
+            -columna : int
+            +desdeTexto(texto)$ Coordenada
+            +aTexto() String
+            +desplazar(df, dc) Coordenada
+        }
+        class GeneradorMinas {
+            <<interface>>
+            +generar(filas, columnas, cantidad) Set~Coordenada~
+        }
+        class GeneradorMinasAleatorio {
+            -aleatorio : Random
+        }
+        class EstadoCasilla {
+            <<enumeration>>
+            CUBIERTA
+            MARCADA
+            DESCUBIERTA
+        }
+        class EstadoPartida {
+            <<enumeration>>
+            EN_CURSO
+            GANADA
+            PERDIDA
+        }
+        class ResultadoDescubrimiento {
+            <<enumeration>>
+            MINA
+            NUMERO
+            VACIA
+        }
+    }
+    namespace excepciones {
+        class BuscaminasException
+        class CoordenadaInvalidaException
+        class CoordenadaFueraDeRangoException
+        class CasillaYaDescubiertaException
+        class CasillaMarcadaException
+        class JuegoTerminadoException
+    }
+    namespace persistencia {
+        class RepositorioPartida {
+            <<interface>>
+            +existePartidaGuardada() boolean
+            +guardar(p : Partida) void
+            +cargar() Partida
+            +eliminar() void
+        }
+        class RepositorioPartidaBinario {
+            -archivo : Path
+        }
+        class PersistenciaException
+    }
+    namespace vista {
+        class Vista {
+            <<interface>>
+            +mostrarMenuPrincipal(hayGuardada) int
+            +mostrarPartida(p : Partida) void
+            +pedirJugada() String
+            +mostrarError(msg) void
+        }
+        class VistaConsola {
+            -entrada : Scanner
+            -salida : PrintStream
+            -leerEntero(msg) int
+        }
+    }
+    namespace controlador {
+        class JuegoController {
+            -partida : Partida
+            +iniciar() void
+            ~procesarJugada(texto) boolean
+        }
+        class Comando {
+            <<record>>
+            +tipo : Tipo
+            +coordenada : Coordenada
+            +desdeTexto(texto)$ Comando
+        }
+        class ComandoInvalidoException
+    }
+    CasillaSoloLectura <|.. Casilla
+    Casilla <|-- CasillaMina
+    Casilla <|-- CasillaSegura
+    Tablero "1" *-- "100" Casilla : composición
+    Partida "1" *-- "1" Tablero
+    Partida "1" o-- "1" Jugador
+    Tablero ..> GeneradorMinas : usa al construirse
+    GeneradorMinas <|.. GeneradorMinasAleatorio
+    Casilla --> Coordenada
+    Casilla --> EstadoCasilla
+    Partida --> EstadoPartida
+    Exception <|-- BuscaminasException
+    BuscaminasException <|-- CoordenadaInvalidaException
+    CoordenadaInvalidaException <|-- CoordenadaFueraDeRangoException
+    BuscaminasException <|-- CasillaYaDescubiertaException
+    BuscaminasException <|-- CasillaMarcadaException
+    BuscaminasException <|-- JuegoTerminadoException
+    BuscaminasException <|-- ComandoInvalidoException
+    Exception <|-- PersistenciaException
+    RepositorioPartida <|.. RepositorioPartidaBinario
+    RepositorioPartidaBinario ..> Partida : serializa
+    Vista <|.. VistaConsola
+    VistaConsola ..> CasillaSoloLectura : dibuja
+    JuegoController --> Vista
+    JuegoController --> RepositorioPartida
+    JuegoController --> GeneradorMinas
+    JuegoController --> Partida
+    JuegoController ..> Comando
